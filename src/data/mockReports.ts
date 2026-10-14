@@ -12,10 +12,11 @@ export const NASHIK_CENTER = { lat: 19.9975, lng: 73.7898 }
 
 export const DEFAULT_PIN = { lat: 20.0063, lng: 73.7621 }
 
-export const MOCK_REPORTS: Report[] = [
+export const MOCK_REPORTS: Report[] = ([
   {
     id: 'CP-1042',
     type: 'Pothole',
+
     category: 'Road Infrastructure',
     description:
       'Deep trench near the storm drain on College Road. Fast-moving traffic is braking abruptly.',
@@ -186,6 +187,7 @@ export const MOCK_REPORTS: Report[] = [
       { label: 'Community monitoring', done: true },
     ],
   },
-]
+] as Report[]).map((r) => ({ ...r, isDemo: true }))
+
 
 export const NEARBY_ALERT_IDS = ['CP-1042', 'CP-1041', 'CP-1040'] as const

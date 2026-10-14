@@ -1,8 +1,50 @@
-import { ArrowRight, RadioTower, Shield, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Loader2, LogIn, RadioTower, Shield, ShieldCheck, UserPlus, X } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export function Landing() {
   const navigate = useNavigate()
+  const { user, isConfigured, signIn, signUp } = useAuth()
+
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError(null)
+    setSubmitting(true)
+
+    if (authMode === 'signup') {
+      if (!fullName.trim()) {
+        setAuthError('Please enter your full name')
+        setSubmitting(false)
+        return
+      }
+      const { error } = await signUp(email, password, fullName.trim())
+      setSubmitting(false)
+      if (error) {
+        setAuthError(error.message)
+      } else {
+        setSignupSuccess(true)
+      }
+    } else {
+      const { error } = await signIn(email, password)
+      setSubmitting(false)
+      if (error) {
+        setAuthError(error.message)
+      } else {
+        setAuthModalOpen(false)
+        navigate('/home')
+      }
+    }
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-surface">
@@ -18,7 +60,9 @@ export function Landing() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-error opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-error" />
           </span>
-          <span className="text-[11px] font-semibold">Nashik · demo</span>
+          <span className="text-[11px] font-semibold">
+            {isConfigured ? 'Nashik · live' : 'Nashik · demo'}
+          </span>
         </div>
       </header>
 
@@ -33,7 +77,7 @@ export function Landing() {
             </div>
             <div className="absolute top-7 left-6 flex items-center gap-1.5 rounded-full border border-error/30 bg-surface-lowest/90 px-2 py-0.5 text-[12px]">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-error" />
-              Pothole (demo)
+              Pothole
             </div>
             <div className="absolute right-6 bottom-8 flex items-center gap-1.5 rounded-full border border-tertiary-container/30 bg-surface-lowest/90 px-2 py-0.5 text-[12px]">
               <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
@@ -50,7 +94,7 @@ export function Landing() {
               </div>
               <div>
                 <p className="text-[20px] font-bold leading-none">8</p>
-                <p className="mt-0.5 text-[11px] text-on-surface-variant">Demo hazards</p>
+                <p className="mt-0.5 text-[11px] text-on-surface-variant">Hazards tracked</p>
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-lg border border-outline-variant/40 bg-surface-low p-2.5">
@@ -58,8 +102,12 @@ export function Landing() {
                 <ShieldCheck className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-[20px] font-bold leading-none">Mock</p>
-                <p className="mt-0.5 text-[11px] text-on-surface-variant">Sample data only</p>
+                <p className="text-[20px] font-bold leading-none">
+                  {user ? 'Citizen' : 'Guest'}
+                </p>
+                <p className="mt-0.5 text-[11px] text-on-surface-variant">
+                  {user ? 'Authenticated' : 'Browsing'}
+                </p>
               </div>
             </div>
           </div>
@@ -78,26 +126,170 @@ export function Landing() {
         </div>
 
         <div className="mt-auto space-y-2">
-          <button
-            type="button"
-            onClick={() => navigate('/home')}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary-container text-[13px] font-semibold text-on-primary-container shadow-sm active:scale-[0.98]"
-          >
-            Continue as Citizen
-            <ArrowRight className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/home')}
-            className="flex h-12 w-full items-center justify-center rounded-lg border border-outline-variant/60 bg-surface-low text-[13px] font-semibold text-on-surface active:scale-[0.98]"
-          >
-            Sign In
-          </button>
-          <p className="pt-3 text-center text-[11px] text-on-surface-variant">
-            Prototype login — no real authentication yet.
+          {user ? (
+            <button
+              type="button"
+              onClick={() => navigate('/home')}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary-container text-[13px] font-semibold text-on-primary-container shadow-sm active:scale-[0.98]"
+            >
+              Enter as {user.email?.split('@')[0]}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate('/home')}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary-container text-[13px] font-semibold text-on-primary-container shadow-sm active:scale-[0.98]"
+              >
+                Continue as Guest Citizen
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthError(null)
+                  setSignupSuccess(false)
+                  setAuthModalOpen(true)
+                }}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant/60 bg-surface-low text-[13px] font-semibold text-on-surface active:scale-[0.98]"
+              >
+                <LogIn className="h-4 w-4 text-primary" />
+                Sign In / Register
+              </button>
+            </>
+          )}
+          <p className="pt-2 text-center text-[11px] text-on-surface-variant">
+            {isConfigured
+              ? 'Secured with Supabase Authentication & Row Level Security'
+              : 'Supabase credentials not set in .env. Running in offline demo mode.'}
           </p>
         </div>
       </main>
+
+      {/* Auth Modal preserving native aesthetic */}
+      {authModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs">
+          <div className="w-full max-w-[430px] rounded-t-3xl sm:rounded-2xl border border-outline-variant/60 bg-surface-lowest p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-3">
+              <h3 className="text-[20px] font-bold">
+                {authMode === 'signin' ? 'Sign in to CityPulse' : 'Create Citizen Account'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(false)}
+                className="rounded-full p-1 text-on-surface-variant hover:bg-surface-high"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {signupSuccess ? (
+              <div className="py-6 text-center space-y-3">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-tertiary-fixed text-tertiary">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <h4 className="text-[16px] font-semibold">Verification link sent</h4>
+                <p className="text-[13px] text-on-surface-variant">
+                  We sent a confirmation email to <strong>{email}</strong>. Please confirm your email
+                  or sign in if email confirmation is disabled.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignupSuccess(false)
+                    setAuthMode('signin')
+                  }}
+                  className="mt-3 inline-block text-[13px] font-semibold text-primary"
+                >
+                  Switch to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleAuthSubmit} className="space-y-4 pt-2">
+                {authError && (
+                  <div className="rounded-lg bg-error-container p-3 text-[12px] text-error">
+                    {authError}
+                  </div>
+                )}
+
+                {authMode === 'signup' && (
+                  <div>
+                    <label className="block text-[12px] font-semibold text-outline">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Aditi Sharma"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[14px] text-on-surface placeholder:text-outline"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[12px] font-semibold text-outline">Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[14px] text-on-surface placeholder:text-outline"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-semibold text-outline">Password</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[14px] text-on-surface placeholder:text-outline"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-[14px] font-semibold text-on-primary shadow-sm disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {submitting ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : authMode === 'signin' ? (
+                    <>
+                      <LogIn className="h-4 w-4" /> Sign In
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-4 w-4" /> Create Account
+                    </>
+                  )}
+                </button>
+
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthError(null)
+                      setAuthMode(authMode === 'signin' ? 'signup' : 'signin')
+                    }}
+                    className="text-[13px] font-medium text-primary hover:underline"
+                  >
+                    {authMode === 'signin'
+                      ? "Don't have an account? Sign up"
+                      : 'Already have an account? Sign in'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

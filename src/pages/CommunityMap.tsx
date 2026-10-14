@@ -1,9 +1,10 @@
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Layers } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapView } from '../components/MapView'
 import { SeverityBadge, StatusBadge } from '../components/StatusBadge'
 import { TopHeader } from '../components/TopHeader'
+import { useAuth } from '../context/AuthContext'
 import { useReports } from '../context/ReportsContext'
 import { NASHIK_CENTER } from '../data/mockReports'
 import { cn } from '../lib/cn'
@@ -14,7 +15,8 @@ import type { MapFilter, Report } from '../types/report'
 const FILTERS: MapFilter[] = ['All', 'Roads', 'Waste', 'Water', 'Electricity', 'Other']
 
 export function CommunityMap() {
-  const { reports } = useReports()
+  const { reports, showMockData, setShowMockData } = useReports()
+  const { isConfigured } = useAuth()
   const navigate = useNavigate()
   const [filter, setFilter] = useState<MapFilter>('All')
   const [selected, setSelected] = useState<Report | null>(null)
@@ -27,7 +29,10 @@ export function CommunityMap() {
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-      <TopHeader title="Community" subtitle="Mock hazards around Nashik" />
+      <TopHeader
+        title="Community Map"
+        subtitle={isConfigured ? 'Live citizen reports' : 'Mock hazards around Nashik'}
+      />
       <div className="relative min-h-0 flex-1">
         <MapView
           reports={visible}
@@ -60,7 +65,8 @@ export function CommunityMap() {
           </div>
         </div>
 
-        <div className="absolute top-16 right-3 z-20">
+        {/* Legend and Demo Data Toggle */}
+        <div className="absolute top-16 right-3 z-20 flex flex-col items-end gap-2">
           <button
             type="button"
             onClick={() => setLegendOpen((open) => !open)}
@@ -68,11 +74,29 @@ export function CommunityMap() {
           >
             Legend {legendOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
+
           {legendOpen && (
-            <div className="mt-2 w-40 space-y-2 rounded-xl border border-outline-variant/60 bg-surface/95 p-3 text-[12px] shadow-md backdrop-blur-md">
+            <div className="w-48 space-y-2 rounded-xl border border-outline-variant/60 bg-surface/95 p-3 text-[12px] shadow-md backdrop-blur-md">
               <LegendDot color="#ef4444" label="High severity" />
               <LegendDot color="#f59e0b" label="Medium severity" />
               <LegendDot color="#007d55" label="Low / resolved" />
+
+              {isConfigured && (
+                <div className="mt-3 pt-2 border-t border-outline-variant/40">
+                  <label className="flex items-center justify-between text-[11px] font-medium cursor-pointer">
+                    <span className="flex items-center gap-1">
+                      <Layers className="h-3.5 w-3.5 text-primary" />
+                      Preview Demo Data
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={showMockData}
+                      onChange={(e) => setShowMockData(e.target.checked)}
+                      className="rounded accent-primary"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -83,7 +107,14 @@ export function CommunityMap() {
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-outline-variant/60" />
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="text-[12px] text-outline">Issue</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-[12px] text-outline">Issue</p>
+                    {selected.isDemo && (
+                      <span className="rounded bg-warning-container px-1.5 py-0.5 text-[10px] font-bold text-on-warning-container">
+                        DEMO
+                      </span>
+                    )}
+                  </div>
                   <h2 className="text-[18px] font-semibold">{selected.type}</h2>
                 </div>
                 <SeverityBadge severity={selected.severity} />

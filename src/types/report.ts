@@ -39,16 +39,23 @@ export interface Report {
   reportedAt: string
   confirmations: number
   image: string | null
+  userId?: string | null
   isMine?: boolean
+  isDemo?: boolean
   distanceMeters?: number
   timeline?: TimelineStep[]
 }
+
+
 
 export interface TimelineStep {
   label: string
   done: boolean
   active?: boolean
+  timestamp?: string
+  actor?: 'citizen' | 'community' | 'moderator'
 }
+
 
 export interface GeoPoint {
   lat: number

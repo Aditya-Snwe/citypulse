@@ -1,30 +1,57 @@
 import { Bell, MapPin } from 'lucide-react'
 import { useParams } from 'react-router-dom'
+
 import { SeverityBadge, StatusBadge } from '../components/StatusBadge'
 import { Timeline } from '../components/Timeline'
 import { TopHeader } from '../components/TopHeader'
 import { VerificationCard } from '../components/VerificationCard'
+import { useAuth } from '../context/AuthContext'
 import { useReports } from '../context/ReportsContext'
 import { formatCoords, formatDate } from '../lib/format'
 
 export function ReportDetails() {
   const { id } = useParams()
-  const { getReport, confirmIssue, getVote } = useReports()
+  const { user, isConfigured } = useAuth()
+  const { getReport, confirmIssue, getVote, loading } = useReports()
   const report = id ? getReport(id) : undefined
+
+  if (loading && !report) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <TopHeader title="Report" backTo="/reports" />
+        <p className="p-6 text-center text-[14px] text-on-surface-variant">Loading report details…</p>
+      </div>
+    )
+  }
 
   if (!report) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <TopHeader title="Report" backTo="/reports" />
-        <p className="p-4 text-[14px] text-on-surface-variant">This report could not be found.</p>
+        <div className="p-6 text-center space-y-2">
+          <p className="text-[16px] font-semibold">Report Not Found</p>
+          <p className="text-[14px] text-on-surface-variant">
+            This report does not exist or may have been removed.
+          </p>
+        </div>
       </div>
     )
   }
 
+  // Display short ID if UUID
+  const shortId = report.id.length > 10 ? `CP-${report.id.substring(0, 8)}` : report.id
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <TopHeader title={report.id} backTo={-1} />
+      <TopHeader title={shortId} backTo={-1} />
       <main className="flex-1 space-y-4 overflow-y-auto px-4 pt-4 pb-4">
+        {report.isDemo && (
+          <div className="flex items-center gap-1.5 rounded-xl border border-warning-container/50 bg-warning-container/20 px-3 py-2 text-[12px] text-on-surface-variant">
+            <span className="font-semibold text-warning">DEMO REPORT</span>
+            <span>· Sample dataset for testing.</span>
+          </div>
+        )}
+
         <section className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4">
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={report.status} />
@@ -32,7 +59,7 @@ export function ReportDetails() {
           </div>
           <h2 className="mt-3 text-[24px] font-semibold tracking-tight">{report.type}</h2>
           <p className="mt-2 flex items-start gap-1.5 text-[14px] text-on-surface-variant">
-            <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             {report.locationLabel}
           </p>
         </section>
@@ -82,11 +109,19 @@ export function ReportDetails() {
           />
         </section>
 
+        {isConfigured && !user && (
+          <p className="text-center text-[12px] text-on-surface-variant italic">
+            Sign in to verify civic issues with the community.
+          </p>
+        )}
+
         <VerificationCard
           confirmations={report.confirmations}
           vote={getVote(report.id)}
           onVote={(vote) => confirmIssue(report.id, vote)}
+          disabled={isConfigured && !user}
         />
+
 
         <section className="rounded-2xl border border-outline-variant/40 bg-surface-low p-4">
           <div className="mb-1 flex items-center gap-2 text-primary">
@@ -94,7 +129,7 @@ export function ReportDetails() {
             <h3 className="text-[16px] font-semibold">Nearby Citizen Alert</h3>
           </div>
           <p className="text-[14px] text-on-surface-variant">
-            Citizens within the affected area may receive an awareness alert.
+            Citizens within this ward/radius receive alerts to confirm or avoid this area.
           </p>
         </section>
       </main>

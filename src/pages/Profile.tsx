@@ -1,9 +1,21 @@
-import { ChevronRight, LogOut, MapPin, Shield } from 'lucide-react'
+import { ChevronRight, LogIn, LogOut, MapPin, Shield } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { TopHeader } from '../components/TopHeader'
+import { useAuth } from '../context/AuthContext'
 
 export function Profile() {
   const navigate = useNavigate()
+  const { user, profile, loading, signOut, isConfigured } = useAuth()
+
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Aditi Sharma'
+  const displayArea = profile?.area_label || (user ? 'Nashik' : 'College Road area (demo profile)')
+  const displayRole = profile?.role ? `Citizen · ${profile.role}` : (user ? 'Citizen · Verified' : 'Citizen · Guest')
+  const initial = displayName.charAt(0).toUpperCase()
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/')
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -12,16 +24,18 @@ export function Profile() {
         <section className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-[18px] font-bold text-primary">
-              A
+              {initial}
             </div>
             <div>
-              <h2 className="text-[18px] font-semibold">Aditi Sharma</h2>
-              <p className="text-[13px] text-on-surface-variant">Citizen · Nashik West</p>
+              <h2 className="text-[18px] font-semibold">{loading ? 'Loading…' : displayName}</h2>
+              <p className="text-[13px] text-on-surface-variant">
+                {user ? user.email : displayRole}
+              </p>
             </div>
           </div>
           <p className="mt-3 flex items-center gap-1.5 text-[13px] text-on-surface-variant">
             <MapPin className="h-4 w-4 text-primary" />
-            College Road area (demo profile)
+            {displayArea}
           </p>
         </section>
 
@@ -37,14 +51,34 @@ export function Profile() {
           app categorizes it internally.
         </p>
 
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-lowest text-[14px] font-semibold active:scale-[0.98]"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
+        {user ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-lowest text-[14px] font-semibold text-error active:scale-[0.98]"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-lowest text-[14px] font-semibold active:scale-[0.98]"
+          >
+            {isConfigured ? (
+              <>
+                <LogIn className="h-4 w-4 text-primary" />
+                Sign in or register
+              </>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4" />
+                Return to landing
+              </>
+            )}
+          </button>
+        )}
       </main>
     </div>
   )

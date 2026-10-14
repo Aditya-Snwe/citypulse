@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { cn } from '../lib/cn'
+import { useNotifications } from '../context/NotificationsContext'
 
 const tabs = [
   { to: '/home', label: 'Home', icon: House, match: ['/home'] },
@@ -66,6 +67,8 @@ export function BottomTabBar() {
 }
 
 export function BellButton() {
+  const { unreadCount } = useNotifications()
+
   return (
     <NavLink
       to="/notifications"
@@ -73,7 +76,11 @@ export function BellButton() {
       className="relative flex h-11 w-11 items-center justify-center rounded-lg text-on-surface hover:bg-surface-container active:scale-95"
     >
       <Bell className="h-5 w-5" />
-      <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-error ring-2 ring-surface" />
+      {unreadCount > 0 && (
+        <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-on-error ring-2 ring-surface">
+          {unreadCount > 99 ? '99+' : unreadCount}
+        </span>
+      )}
     </NavLink>
   )
 }

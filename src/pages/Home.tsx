@@ -3,20 +3,31 @@ import { Link } from 'react-router-dom'
 import { AlertCard } from '../components/AlertCard'
 import { ReportCard } from '../components/ReportCard'
 import { TopHeader } from '../components/TopHeader'
+import { useAuth } from '../context/AuthContext'
 import { useReports } from '../context/ReportsContext'
-import { NEARBY_ALERT_IDS } from '../data/mockReports'
 import { greeting } from '../lib/format'
 
 export function Home() {
-  const { reports } = useReports()
-  const nearby = NEARBY_ALERT_IDS.map((id) => reports.find((r) => r.id === id)).filter(
-    (r): r is NonNullable<typeof r> => Boolean(r),
-  )
-  const mine = reports.filter((r) => r.isMine).slice(0, 3)
+  const { reports, loading } = useReports()
+  const { user, isConfigured } = useAuth()
+
+  // Real reports prioritization:
+  // Nearby alerts show active/unresolved reports first
+  const nearby = reports
+    .filter((r) => r.status !== 'Resolved')
+    .slice(0, 5)
+
+  // User's own reports: strictly by user.id if configured, else isMine flag
+  const mine = reports
+    .filter((r) => (isConfigured ? user && r.userId === user.id : r.isMine))
+    .slice(0, 3)
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <TopHeader title="Nashik, College Rd" subtitle="Demo civic feed · not live reports" />
+      <TopHeader
+        title="Nashik, Civic Feed"
+        subtitle={isConfigured ? 'Live community awareness' : 'Demo civic feed · offline mode'}
+      />
       <main className="flex-1 space-y-6 overflow-y-auto px-4 pt-4 pb-4">
         <section>
           <p className="text-[11px] font-semibold tracking-wide text-primary uppercase">
@@ -26,7 +37,7 @@ export function Home() {
             {greeting()} 👋
           </h2>
           <p className="mt-1 text-[14px] text-on-surface-variant">
-            Stay aware of what's happening around you.
+            Stay aware of civic hazards and reports around you.
           </p>
         </section>
 
@@ -39,12 +50,23 @@ export function Home() {
         </Link>
 
         <section className="space-y-3">
-          <h3 className="text-[20px] font-semibold">Nearby Alerts</h3>
-          <div className="flex gap-3 overflow-x-auto pb-1 hide-scrollbar">
-            {nearby.map((report) => (
-              <AlertCard key={report.id} report={report} compact />
-            ))}
+          <div className="flex items-center justify-between">
+            <h3 className="text-[20px] font-semibold">Active Alerts</h3>
+            <span className="text-[12px] text-on-surface-variant">
+              {loading ? 'Updating…' : `${nearby.length} active`}
+            </span>
           </div>
+          {nearby.length > 0 ? (
+            <div className="flex gap-3 overflow-x-auto pb-1 hide-scrollbar">
+              {nearby.map((report) => (
+                <AlertCard key={report.id} report={report} compact />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-6 text-center text-[13px] text-on-surface-variant">
+              No active alerts right now. Your neighborhood is clear.
+            </div>
+          )}
         </section>
 
         <section className="space-y-3">
@@ -58,9 +80,17 @@ export function Home() {
             </Link>
           </div>
           <div className="space-y-3">
-            {mine.map((report) => (
-              <ReportCard key={report.id} report={report} />
-            ))}
+            {mine.length > 0 ? (
+              mine.map((report) => <ReportCard key={report.id} report={report} />)
+            ) : (
+              <div className="rounded-2xl border border-dashed border-outline-variant/60 p-4 text-center">
+                <p className="text-[13px] text-on-surface-variant">
+                  {isConfigured && !user
+                    ? 'Sign in to see reports you have submitted.'
+                    : 'You haven’t reported any civic issues yet.'}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </main>

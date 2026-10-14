@@ -29,18 +29,36 @@ export function Timeline({ steps }: { steps: TimelineStep[] }) {
                 />
               )}
             </div>
-            <p
-              className={cn(
-                'pt-1.5 pb-4 text-[14px] font-medium',
-                step.active ? 'text-primary' : 'text-on-surface',
+            <div className="pt-1 pb-4 flex-1">
+              <p
+                className={cn(
+                  'text-[14px] font-medium leading-snug',
+                  step.active ? 'text-primary' : 'text-on-surface',
+                )}
+              >
+                {step.done ? '✓ ' : step.active ? '● ' : '○ '}
+                {step.label}
+              </p>
+              {step.timestamp && (
+                <p className="mt-0.5 text-[11px] text-on-surface-variant">
+                  {new Date(step.timestamp).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                  {step.actor && (
+                    <span className="ml-1.5 rounded bg-surface-high px-1 py-0.5 text-[10px] text-outline uppercase font-semibold">
+                      {step.actor}
+                    </span>
+                  )}
+                </p>
               )}
-            >
-              {step.done ? '✓ ' : step.active ? '● ' : '○ '}
-              {step.label}
-            </p>
+            </div>
           </li>
         )
       })}
     </ol>
   )
 }
+
