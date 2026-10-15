@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { formatRelative } from '../lib/format'
 import { cn } from '../lib/cn'
+import { WebPushOptInCard } from '../components/WebPushOptInCard'
 
 export function Notifications() {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead, refresh } =
@@ -57,6 +58,8 @@ export function Notifications() {
       />
 
       <main className="flex-1 space-y-3 overflow-y-auto px-4 pt-3 pb-6">
+        <WebPushOptInCard />
+
         {!isSupabaseConfigured ? (
           <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4 text-center">
             <Bell className="mx-auto h-8 w-8 text-on-surface-variant/50" />

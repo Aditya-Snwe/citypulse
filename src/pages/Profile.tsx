@@ -2,6 +2,8 @@ import { ChevronRight, LogIn, LogOut, MapPin, Shield } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { TopHeader } from '../components/TopHeader'
 import { useAuth } from '../context/AuthContext'
+import { WebPushOptInCard } from '../components/WebPushOptInCard'
+import { AlertPreferencesCard } from '../components/AlertPreferencesCard'
 
 export function Profile() {
   const navigate = useNavigate()
@@ -44,6 +46,10 @@ export function Profile() {
           <Row label="My reports" onClick={() => navigate('/reports')} />
           <Row label="Community map" onClick={() => navigate('/map')} />
         </section>
+
+        <AlertPreferencesCard />
+
+        <WebPushOptInCard />
 
         <p className="flex items-start gap-2 rounded-2xl bg-surface-low p-4 text-[13px] text-on-surface-variant">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-primary" />

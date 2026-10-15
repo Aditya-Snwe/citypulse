@@ -352,6 +352,18 @@ export interface Database {
           user_vote: DbVoteType
         }[]
       }
+      get_eligible_push_subscriptions: {
+        Args: {
+          p_report_id: string
+        }
+        Returns: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+        }[]
+      }
     }
 
     Enums: {

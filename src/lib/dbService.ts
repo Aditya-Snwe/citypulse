@@ -6,6 +6,7 @@ export type Profile = Database['public']['Tables']['profiles']['Row']
 export type UserAlertPreferences = Database['public']['Tables']['user_alert_preferences']['Row']
 export type SavedAlertLocation = Database['public']['Tables']['saved_alert_locations']['Row']
 export type NotificationItem = Database['public']['Tables']['notifications']['Row']
+export type BrowserPushSubscription = Database['public']['Tables']['browser_push_subscriptions']['Row']
 
 export const dbService = {
   // Profiles
@@ -256,5 +257,60 @@ export const dbService = {
 
     if (error) return []
     return data || []
+  },
+
+  async addSavedLocation(
+    userId: string,
+    location: { label: string; latitude: number; longitude: number; radius_meters?: number },
+  ): Promise<SavedAlertLocation | null> {
+    if (!isSupabaseConfigured) return null
+    const { data, error } = await supabase
+      .from('saved_alert_locations')
+      .insert({
+        user_id: userId,
+        label: location.label,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        radius_meters: location.radius_meters || 2000,
+        is_primary: false,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.warn('Failed to add saved alert location:', error.message)
+      return null
+    }
+    return data
+  },
+
+  async deleteSavedLocation(id: string): Promise<boolean> {
+    if (!isSupabaseConfigured) return false
+    const { error } = await supabase.from('saved_alert_locations').delete().eq('id', id)
+    return !error
+  },
+
+  // Browser Push Subscriptions
+  async getPushSubscriptions(userId: string): Promise<BrowserPushSubscription[]> {
+    if (!isSupabaseConfigured) return []
+    const { data, error } = await supabase
+      .from('browser_push_subscriptions')
+      .select('*')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.warn('Could not fetch push subscriptions:', error.message)
+      return []
+    }
+    return data || []
+  },
+
+  async deletePushSubscription(userId: string, endpoint: string) {
+    if (!isSupabaseConfigured) return
+    await supabase
+      .from('browser_push_subscriptions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('endpoint', endpoint)
   },
 }
