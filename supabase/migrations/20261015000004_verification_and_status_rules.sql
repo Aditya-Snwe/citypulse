@@ -22,6 +22,8 @@ WHERE positive_votes = 1 AND confirmations > 1;
 --    a) Authorized municipal moderator/admin, OR
 --    b) Verified report owner confirming fix, OR
 --    c) Strict consensus threshold: at least 5 resolved votes with a 75%+ consensus ratio (negative_votes >= 5 AND negative_votes >= positive_votes * 3).
+DROP FUNCTION IF EXISTS public.record_report_vote(UUID, vote_type);
+
 CREATE OR REPLACE FUNCTION public.record_report_vote(
   p_report_id UUID,
   p_vote vote_type
