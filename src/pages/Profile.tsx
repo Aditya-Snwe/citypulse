@@ -9,7 +9,7 @@ export function Profile() {
   const navigate = useNavigate()
   const { user, profile, loading, signOut, isConfigured } = useAuth()
 
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Aditi Sharma'
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Guest'
   const displayArea = profile?.area_label || (user ? 'Nashik' : 'College Road area (demo profile)')
   const displayRole = profile?.role ? `Citizen · ${profile.role}` : (user ? 'Citizen · Verified' : 'Citizen · Guest')
   const initial = displayName.charAt(0).toUpperCase()

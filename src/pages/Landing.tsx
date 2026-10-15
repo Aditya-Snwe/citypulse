@@ -50,7 +50,7 @@ export function Landing() {
       if (!isConfigured) {
         // Offline demo sign-in simulation
         setTimeout(() => {
-          const derivedName = email.split('@')[0] || 'Aditi Sharma'
+          const derivedName = email.split('@')[0] || 'Guest'
           simulateDemoAuth(email, derivedName.charAt(0).toUpperCase() + derivedName.slice(1))
           setSubmitting(false)
           setAuthModalOpen(false)
@@ -332,7 +332,7 @@ export function Landing() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Aditi Sharma"
+                      placeholder="e.g. Citizen Name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[14px] text-on-surface placeholder:text-outline"
@@ -391,13 +391,13 @@ export function Landing() {
                       <button
                         type="button"
                         onClick={() => {
-                          simulateDemoAuth('aditi@citypulse.local', 'Aditi Sharma')
+                          simulateDemoAuth('guest@citypulse.local', 'Guest')
                           setAuthModalOpen(false)
                           navigate('/home')
                         }}
                         className="flex-1 rounded-lg border border-primary/30 bg-primary/5 py-1.5 text-[12px] font-semibold text-primary hover:bg-primary/10 active:scale-95"
                       >
-                        Citizen 1 (Aditi)
+                        Guest
                       </button>
                       <button
                         type="button"
