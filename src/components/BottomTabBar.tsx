@@ -23,7 +23,7 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="z-40 flex h-[72px] items-end justify-around border-t border-outline-variant/40 bg-surface/90 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md"
+      className="z-40 flex h-[72px] items-end justify-around border-t border-outline-variant/40 bg-surface/90 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
       aria-label="Primary"
     >
       {tabs.map((tab) => {

@@ -36,7 +36,11 @@ export function checkPushSupport(): PushSupportStatus {
     }
   }
 
+  // Push API and Service Workers strictly require a secure context (HTTPS or localhost)
+  const isSecure = Boolean(window.isSecureContext)
+
   const supported =
+    isSecure &&
     'serviceWorker' in navigator &&
     'PushManager' in window &&
     'Notification' in window
@@ -44,9 +48,18 @@ export function checkPushSupport(): PushSupportStatus {
   const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
   const hasVapidKey = Boolean(vapidKey && !vapidKey.includes('your-vapid-public-key'))
 
+  let permission: NotificationPermission | 'unsupported' = 'unsupported'
+  try {
+    if (supported && typeof Notification !== 'undefined') {
+      permission = Notification.permission
+    }
+  } catch {
+    permission = 'unsupported'
+  }
+
   return {
     supported,
-    permission: supported ? Notification.permission : 'unsupported',
+    permission,
     serviceWorkerReady: false,
     hasVapidKey,
   }

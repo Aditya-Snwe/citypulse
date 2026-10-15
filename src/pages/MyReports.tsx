@@ -43,74 +43,92 @@ export function MyReports() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-      <TopHeader title="My Reports" subtitle="Track the issues you submitted" />
-      <main className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <TopHeader
+        title="My Reports"
+        subtitle="Track the civic issues you submitted and their community verification status"
+        right={
+          <Link
+            to="/report"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-primary-container px-3.5 py-1.5 text-[13px] font-semibold text-on-primary shadow-xs hover:bg-primary transition-all active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Report</span>
+          </Link>
+        }
+      />
+
+      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {isConfigured && !user ? (
-          <div className="rounded-2xl border border-outline-variant/50 bg-surface-lowest p-6 text-center space-y-3">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-fixed text-primary">
-              <LogIn className="h-6 w-6" />
+          <div className="mx-auto max-w-md rounded-3xl border border-outline-variant/50 bg-surface-lowest p-8 text-center space-y-4 shadow-xs">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-fixed text-primary">
+              <LogIn className="h-7 w-7" />
             </div>
-            <h3 className="text-[18px] font-semibold">Sign in to track your reports</h3>
-            <p className="text-[13px] text-on-surface-variant max-w-xs mx-auto">
-              You are currently browsing as a guest. Sign in to view and track reports linked to
-              your account.
+            <h3 className="text-[20px] font-bold text-on-surface">Sign in to track your reports</h3>
+            <p className="text-[14px] text-on-surface-variant leading-relaxed">
+              You are currently browsing as a guest. Sign in to view, edit, and track resolution progress for reports linked to your account.
             </p>
             <Link
               to="/"
-              className="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-[13px] font-semibold text-on-primary active:scale-[0.98]"
+              className="mt-2 inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-[14px] font-semibold text-on-primary hover:bg-primary/90 shadow-sm transition-all active:scale-[0.98]"
             >
               Sign In / Register
             </Link>
           </div>
         ) : (
           <>
-            <div className="mb-4 grid grid-cols-3 gap-2">
-              <Metric label="Total" value={counts.All} />
-              <Metric label="Active" value={counts.Active} accent="text-error" />
-              <Metric label="Resolved" value={counts.Resolved} accent="text-tertiary" />
-            </div>
+            {/* Metrics & Filter Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="grid grid-cols-3 gap-3 w-full sm:max-w-md">
+                <Metric label="Total Reports" value={counts.All} />
+                <Metric label="Active" value={counts.Active} accent="text-error" />
+                <Metric label="Resolved" value={counts.Resolved} accent="text-tertiary" />
+              </div>
 
-            <div className="mb-4 flex rounded-full bg-surface-high p-1">
-              {(['All', 'Active', 'Resolved'] as const).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setTab(item)}
-                  className={cn(
-                    'h-11 flex-1 rounded-full text-[13px] font-semibold transition-all active:scale-95',
-                    tab === item
-                      ? 'bg-surface-lowest text-primary shadow-sm'
-                      : 'text-on-surface-variant',
-                  )}
-                >
-                  {item}
-                </button>
-              ))}
+              <div className="flex w-full sm:w-auto rounded-2xl bg-surface-high p-1">
+                {(['All', 'Active', 'Resolved'] as const).map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setTab(item)}
+                    className={cn(
+                      'h-10 px-5 rounded-xl text-[13px] font-semibold transition-all active:scale-95',
+                      tab === item
+                        ? 'bg-surface-lowest text-primary shadow-xs'
+                        : 'text-on-surface-variant hover:text-on-surface',
+                    )}
+                  >
+                    {item} ({counts[item]})
+                  </button>
+                ))}
+              </div>
             </div>
 
             {loading ? (
-              <div className="py-12 text-center text-[13px] text-on-surface-variant">
-                Loading your reports…
+              <div className="py-16 text-center text-[14px] text-on-surface-variant">
+                Loading your civic reports…
               </div>
             ) : filtered.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-outline-variant/60 p-8 text-center space-y-3">
-                <p className="text-[14px] font-medium text-on-surface">No reports in this tab</p>
-                <p className="text-[12px] text-on-surface-variant">
+              <div className="rounded-3xl border border-dashed border-outline-variant/60 p-12 text-center space-y-3">
+                <p className="text-[16px] font-semibold text-on-surface">No reports found in this view</p>
+                <p className="text-[13px] text-on-surface-variant max-w-sm mx-auto">
                   {tab === 'All'
-                    ? "You haven't submitted any civic issues yet."
-                    : `No ${tab.toLowerCase()} reports found.`}
+                    ? "You haven't submitted any civic issues yet. Notice an issue around Nashik? Help by filing a report."
+                    : `No ${tab.toLowerCase()} reports found in your submission history.`}
                 </p>
-                <Link
-                  to="/report"
-                  className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-primary-container px-4 text-[13px] font-semibold text-on-primary"
-                >
-                  <Plus className="h-4 w-4" />
-                  Report an Issue
-                </Link>
+                <div className="pt-2">
+                  <Link
+                    to="/report"
+                    className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary-container px-5 text-[13px] font-semibold text-on-primary hover:bg-primary shadow-xs transition-all active:scale-98"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Report an Issue</span>
+                  </Link>
+                </div>
               </div>
             ) : (
-              <div className="space-y-3">
+              /* Responsive multi-column grid: 1 col on mobile, 2 cols on md, 3 cols on lg+ */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map((report) => (
                   <ReportCard key={report.id} report={report} />
                 ))}
@@ -133,9 +151,12 @@ function Metric({
   accent?: string
 }) {
   return (
-    <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-3 text-center">
-      <p className="text-[11px] text-on-surface-variant">{label}</p>
-      <p className={cn('mt-1 text-[24px] font-bold', accent ?? 'text-on-surface')}>{value}</p>
+    <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-3.5 text-center shadow-xs">
+      <p className="text-[11px] font-medium text-on-surface-variant uppercase tracking-wider">{label}</p>
+      <p className={cn('mt-1 text-[22px] sm:text-[24px] font-bold leading-tight', accent ?? 'text-on-surface')}>
+        {value}
+      </p>
     </div>
   )
 }
+

@@ -7,6 +7,7 @@ import { StatusBadge } from './StatusBadge'
 
 export function ReportCard({ report }: { report: Report }) {
   const navigate = useNavigate()
+  const shortId = report.id.length > 10 ? `CP-${report.id.substring(0, 8)}` : report.id
   const edge =
     report.status === 'Resolved'
       ? 'bg-tertiary'
@@ -20,12 +21,12 @@ export function ReportCard({ report }: { report: Report }) {
     <button
       type="button"
       onClick={() => navigate(`/reports/${report.id}`)}
-      className="relative w-full overflow-hidden rounded-2xl border border-outline-variant/50 bg-surface-lowest p-4 text-left shadow-sm transition-all hover:border-outline active:scale-[0.99]"
+      className="relative w-full overflow-hidden rounded-2xl border border-outline-variant/50 bg-surface-lowest p-4 text-left shadow-sm transition-all hover:border-primary/50 hover:shadow-md active:scale-[0.99]"
     >
       <span className={cn('absolute top-0 bottom-0 left-0 w-1', edge)} />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[12px] font-semibold tracking-tight text-on-surface-variant tabular-nums">
-          {report.id}
+        <span className="text-[12px] font-semibold tracking-tight text-on-surface-variant font-mono">
+          {shortId}
         </span>
         <StatusBadge status={report.status} />
       </div>

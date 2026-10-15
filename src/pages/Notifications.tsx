@@ -37,27 +37,28 @@ export function Notifications() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-surface">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-surface">
       <TopHeader
         title="Notifications"
         backTo="/home"
+        subtitle="Nearby civic reports, verification alerts, and resolution updates"
         showBell={false}
         right={
           unreadCount > 0 ? (
             <button
               type="button"
               onClick={() => markAllAsRead()}
-              className="flex items-center gap-1 text-[12px] font-semibold text-primary hover:underline px-2 py-1"
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-primary hover:underline px-2.5 py-1.5 rounded-lg hover:bg-primary/5 transition-all"
               title="Mark all as read"
             >
               <CheckCheck className="h-4 w-4" />
-              <span>Mark all</span>
+              <span>Mark all read</span>
             </button>
           ) : undefined
         }
       />
 
-      <main className="flex-1 space-y-3 overflow-y-auto px-4 pt-3 pb-6">
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-4 px-4 sm:px-6 py-6">
         <WebPushOptInCard />
 
         {!isSupabaseConfigured ? (

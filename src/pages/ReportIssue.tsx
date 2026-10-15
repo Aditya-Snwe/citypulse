@@ -149,55 +149,64 @@ export function ReportIssue() {
   const isAuthRequired = isConfigured && !user
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
       <TopHeader title="Report an Issue" backTo="/home" showBell={false} />
 
       {isAuthRequired && (
-        <div className="flex items-center justify-between border-b border-warning-container bg-surface-container px-4 py-2.5 text-[12px]">
-          <span className="flex items-center gap-1.5 text-on-surface-variant font-medium">
-            <AlertCircle className="h-4 w-4 text-warning" />
-            Guest mode: Sign in to save reports to the cloud.
-          </span>
-          <Link to="/" className="font-semibold text-primary underline">
-            Sign In
-          </Link>
+        <div className="mx-auto w-full max-w-4xl px-4 pt-3">
+          <div className="flex items-center justify-between rounded-xl border border-warning-container bg-surface-container px-4 py-2.5 text-[12px]">
+            <span className="flex items-center gap-1.5 text-on-surface-variant font-medium">
+              <AlertCircle className="h-4 w-4 text-warning" />
+              Guest mode: Sign in to save reports permanently to your citizen account.
+            </span>
+            <Link to="/" className="font-semibold text-primary underline">
+              Sign In
+            </Link>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-2 border-b border-outline-variant/30 px-4 py-3">
-        {STEPS.map((label, index) => (
-          <div key={label} className="flex flex-col items-center gap-1">
-            <span
-              className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold',
-                index < step && 'bg-tertiary text-on-primary',
-                index === step && 'bg-primary text-on-primary ring-4 ring-primary-fixed',
-                index > step && 'bg-surface-high text-on-surface-variant',
-              )}
-            >
-              {index + 1}
-            </span>
-            <span
-              className={cn(
-                'text-[10px] font-semibold',
-                index === step ? 'text-primary' : 'text-outline',
-              )}
-            >
-              {label}
-            </span>
-          </div>
-        ))}
+      {/* Stepper Progress Bar */}
+      <div className="border-b border-outline-variant/30 bg-surface-lowest/70 backdrop-blur-xs">
+        <div className="mx-auto grid max-w-3xl grid-cols-4 gap-2 sm:gap-4 px-4 sm:px-6 py-3.5">
+          {STEPS.map((label, index) => (
+            <div key={label} className="flex flex-col items-center gap-1">
+              <span
+                className={cn(
+                  'flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full text-[11px] sm:text-[12px] font-bold transition-all',
+                  index < step && 'bg-tertiary text-on-primary',
+                  index === step && 'bg-primary text-on-primary ring-4 ring-primary-fixed',
+                  index > step && 'bg-surface-high text-on-surface-variant',
+                )}
+              >
+                {index + 1}
+              </span>
+              <span
+                className={cn(
+                  'text-[10px] sm:text-[11px] font-semibold',
+                  index === step ? 'text-primary' : 'text-outline',
+                )}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden">
+      {/* Wizard Content */}
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 sm:px-6 py-6">
         {step === 0 && (
-          <div className="h-full overflow-y-auto px-4 py-4">
-            <h2 className="text-[24px] font-semibold tracking-tight">What's the issue?</h2>
-            <p className="mt-1 mb-4 text-[13px] text-on-surface-variant">
-              Tell us what you see. CityPulse will categorize it — you don't need to know the
-              department.
-            </p>
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-on-surface">
+                What is the civic issue?
+              </h2>
+              <p className="mt-1 text-[13px] sm:text-[14px] text-on-surface-variant">
+                Select the issue type you see. CityPulse automatically classifies category and severity priority.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-2">
               {ISSUE_TYPES.map((issue) => (
                 <IssueTypeCard
                   key={issue}
@@ -211,59 +220,85 @@ export function ReportIssue() {
         )}
 
         {step === 1 && (
-          <div className="flex h-full flex-col">
-            <div className="px-4 py-3">
-              <h2 className="text-[24px] font-semibold tracking-tight">Where is it?</h2>
-              <p className="mt-1 text-[13px] text-on-surface-variant">
-                Tap anywhere on the map or use your device GPS.
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-on-surface">
+                Where is it located?
+              </h2>
+              <p className="mt-1 text-[13px] sm:text-[14px] text-on-surface-variant">
+                Tap anywhere on the map or use your device GPS to drop a precise pin.
               </p>
-              <p className="mt-1 text-[12px] font-medium text-primary">
-                {formatCoords(point.lat, point.lng)}
-              </p>
-              {geoStatus && (
-                <p className="mt-1 text-[11px] text-on-surface-variant italic">{geoStatus}</p>
-              )}
             </div>
-            <div className="min-h-0 flex-1">
-              <MapView
-                pickable
-                picked={point}
-                onPick={handleMapPick}
-                center={point}
-                zoom={15}
-              />
-            </div>
-            <div className="px-4 pt-3 pb-1 space-y-2">
-              <button
-                type="button"
-                onClick={useMyLocation}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface-lowest text-[14px] font-semibold active:scale-[0.98]"
-              >
-                <LocateFixed className="h-4 w-4 text-primary" />
-                {geoBusy ? 'Acquiring GPS…' : 'Use My GPS Location'}
-              </button>
-              <div>
-                <label className="block text-[11px] font-semibold text-outline">
-                  Location Note / Landmark
-                </label>
-                <input
-                  type="text"
-                  value={locationLabel}
-                  onChange={(e) => setLocationLabel(e.target.value)}
-                  placeholder="e.g. Near Big Bazaar, College Road"
-                  className="mt-1 w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 text-[13px] text-on-surface"
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+              {/* Interactive Pinning Map */}
+              <div className="md:col-span-7 h-72 sm:h-96 w-full overflow-hidden rounded-2xl border border-outline-variant/50 shadow-xs">
+                <MapView
+                  pickable
+                  picked={point}
+                  onPick={handleMapPick}
+                  center={point}
+                  zoom={15}
                 />
+              </div>
+
+              {/* Location Controls & Landmark Input */}
+              <div className="md:col-span-5 space-y-4">
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-outline-variant bg-surface-lowest text-[13px] sm:text-[14px] font-semibold hover:bg-surface-container active:scale-[0.98] transition-all"
+                >
+                  <LocateFixed className="h-4 w-4 text-primary" />
+                  <span>{geoBusy ? 'Acquiring GPS…' : 'Use My GPS Location'}</span>
+                </button>
+
+                {geoStatus && (
+                  <p className="text-[12px] text-on-surface-variant italic rounded-lg bg-surface-container p-2">
+                    {geoStatus}
+                  </p>
+                )}
+
+                <div className="rounded-xl border border-outline-variant/40 bg-surface-lowest p-3 space-y-1">
+                  <span className="text-[11px] font-semibold text-outline uppercase tracking-wider">
+                    GPS Coordinates
+                  </span>
+                  <p className="text-[13px] font-mono font-medium text-primary">
+                    {formatCoords(point.lat, point.lng)}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-semibold text-on-surface mb-1">
+                    Landmark / Street Address Note
+                  </label>
+                  <input
+                    type="text"
+                    value={locationLabel}
+                    onChange={(e) => setLocationLabel(e.target.value)}
+                    placeholder="e.g. Near Big Bazaar, College Road"
+                    className="w-full rounded-xl border border-outline-variant bg-surface-lowest px-3.5 py-2.5 text-[13px] text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <p className="mt-1 text-[11px] text-outline">
+                    A recognizable street or intersection helps field verification.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="h-full overflow-y-auto px-4 py-4">
-            <h2 className="text-[24px] font-semibold tracking-tight">Add evidence</h2>
-            <p className="mt-1 mb-4 text-[13px] text-on-surface-variant">
-              A photo helps nearby citizens recognize the issue. (Optional, up to 5MB)
-            </p>
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-on-surface">
+                Add evidence & details
+              </h2>
+              <p className="mt-1 text-[13px] sm:text-[14px] text-on-surface-variant">
+                A clear photo helps nearby citizens and field workers identify the exact issue. (Optional, up to 5MB)
+              </p>
+            </div>
+
             <input
               ref={fileRef}
               type="file"
@@ -272,52 +307,72 @@ export function ReportIssue() {
               className="hidden"
               onChange={(event) => onFile(event.target.files?.[0])}
             />
-            {image ? (
-              <div className="relative overflow-hidden rounded-2xl border border-outline-variant/40">
-                <img src={image} alt="Selected evidence" className="h-56 w-full object-cover" />
-                <button
-                  type="button"
-                  aria-label="Remove photo"
-                  onClick={() => {
-                    setImage(null)
-                    setSelectedFile(null)
-                  }}
-                  className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-inverse-surface/80 text-inverse-on"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
+              {/* Photo Area */}
+              <div>
+                <span className="mb-2 block text-[13px] font-semibold text-on-surface">
+                  Photo Evidence
+                </span>
+                {image ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-outline-variant/40 shadow-xs">
+                    <img src={image} alt="Selected evidence" className="h-64 w-full object-cover" />
+                    <button
+                      type="button"
+                      aria-label="Remove photo"
+                      onClick={() => {
+                        setImage(null)
+                        setSelectedFile(null)
+                      }}
+                      className="absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-inverse-surface/80 text-inverse-on hover:bg-inverse-surface active:scale-95"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="flex h-64 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-outline-variant/80 bg-surface-bright p-4 hover:border-primary hover:bg-surface-low transition-all"
+                  >
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-container text-primary">
+                      <Camera className="h-7 w-7" />
+                    </span>
+                    <span className="text-[15px] font-semibold text-on-surface">Tap or click to add photo</span>
+                    <span className="text-[12px] text-on-surface-variant">
+                      JPG, PNG, WEBP, HEIC up to 5MB
+                    </span>
+                  </button>
+                )}
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="flex min-h-56 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-outline bg-surface-bright"
-              >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-container text-primary">
-                  <Camera className="h-7 w-7" />
+
+              {/* Description */}
+              <div className="flex flex-col">
+                <span className="mb-2 block text-[13px] font-semibold text-on-surface">
+                  Description & Observations
                 </span>
-                <span className="text-[16px] font-semibold">Tap to add a photo</span>
-                <span className="text-[12px] text-on-surface-variant">
-                  Camera or gallery (JPG, PNG, WEBP)
-                </span>
-              </button>
-            )}
-            <label className="mt-4 block">
-              <span className="mb-2 block text-[13px] font-semibold">Description</span>
-              <textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={4}
-                placeholder="Describe what needs attention…"
-                className="w-full rounded-lg border border-outline-variant bg-surface-lowest p-3 text-[14px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
-            </label>
+                <textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  rows={8}
+                  placeholder="Describe what needs attention (e.g., depth of pothole, obstruction of traffic, safety risks)…"
+                  className="w-full flex-1 rounded-2xl border border-outline-variant bg-surface-lowest p-3.5 text-[14px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="h-full overflow-y-auto px-4 py-4 space-y-3">
-            <h2 className="text-[24px] font-semibold tracking-tight">Review</h2>
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-[22px] sm:text-[26px] font-bold tracking-tight text-on-surface">
+                Review your report
+              </h2>
+              <p className="mt-1 text-[13px] sm:text-[14px] text-on-surface-variant">
+                Please verify the details before submitting to the Nashik community feed.
+              </p>
+            </div>
 
             {submitError && (
               <div className="flex items-start gap-2 rounded-xl bg-error-container p-3 text-[13px] text-error">
@@ -330,10 +385,10 @@ export function ReportIssue() {
             )}
 
             {duplicates.length > 0 && (
-              <div className="rounded-xl border border-warning-container/80 bg-warning-container/20 p-3 text-[13px]">
+              <div className="rounded-2xl border border-warning-container/80 bg-warning-container/20 p-4 text-[13px]">
                 <div className="flex items-center gap-1.5 font-semibold text-warning">
                   <Info className="h-4 w-4" />
-                  Potential duplicate detected ({duplicates.length} nearby)
+                  <span>Potential duplicate detected ({duplicates.length} nearby)</span>
                 </div>
                 <p className="mt-1 text-on-surface-variant text-[12px]">
                   A similar '{type}' was already reported within {duplicates[0].distanceMeters}m.
@@ -342,25 +397,28 @@ export function ReportIssue() {
               </div>
             )}
 
-            <ReviewRow label="Issue" value={type ?? '—'} />
-            <ReviewRow
-              label="Derived Category & Severity"
-              value={type ? `${categoryForType(type)} · ${severityForType(type)} priority` : '—'}
-            />
-            <ReviewRow
-              label="Location"
-              value={`${locationLabel}\n${formatCoords(point.lat, point.lng)}`}
-            />
-            <ReviewRow label="Description" value={description || 'No description added'} />
-            <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ReviewRow label="Issue Type" value={type ?? '—'} />
+              <ReviewRow
+                label="Derived Category & Severity"
+                value={type ? `${categoryForType(type)} · ${severityForType(type)} priority` : '—'}
+              />
+              <ReviewRow
+                label="Location"
+                value={`${locationLabel}\n${formatCoords(point.lat, point.lng)}`}
+              />
+              <ReviewRow label="Description" value={description || 'No description added'} />
+            </div>
+
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4">
               <p className="text-[12px] font-semibold tracking-wide text-outline uppercase">
-                Photo
+                Attached Photo Evidence
               </p>
               {image ? (
                 <img
                   src={image}
                   alt="Evidence preview"
-                  className="mt-2 h-40 w-full rounded-lg object-cover"
+                  className="mt-2 h-48 w-full max-w-md rounded-xl object-cover"
                 />
               ) : (
                 <p className="mt-2 text-[14px] text-on-surface-variant">No photo attached</p>
@@ -368,11 +426,12 @@ export function ReportIssue() {
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      <div className="border-t border-outline-variant/30 bg-surface px-4 py-3">
-        <div className="flex gap-2">
-          {step > 0 && (
+      {/* Action Footer */}
+      <footer className="border-t border-outline-variant/30 bg-surface/95 backdrop-blur-md px-4 sm:px-6 py-4">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          {step > 0 ? (
             <button
               type="button"
               disabled={submitting}
@@ -380,37 +439,38 @@ export function ReportIssue() {
                 setSubmitError(null)
                 setStep((s) => s - 1)
               }}
-              className="h-12 min-w-24 rounded-lg border border-outline-variant bg-surface-low px-4 text-[14px] font-semibold active:scale-[0.98] disabled:opacity-50"
+              className="h-12 min-w-28 rounded-xl border border-outline-variant bg-surface-lowest px-5 text-[14px] font-semibold hover:bg-surface-container active:scale-[0.98] disabled:opacity-50 transition-all"
             >
               Back
             </button>
-          )}
+          ) : <div />}
+
           {step < 3 ? (
             <button
               type="button"
               disabled={!canNext}
               onClick={handleNextStep}
-              className="h-12 flex-1 rounded-lg bg-primary-container text-[14px] font-semibold text-on-primary disabled:opacity-40 active:scale-[0.98]"
+              className="h-12 min-w-36 rounded-xl bg-primary-container px-6 text-[14px] font-semibold text-on-primary hover:bg-primary disabled:opacity-40 active:scale-[0.98] transition-all"
             >
-              Next
+              Next Step
             </button>
           ) : (
             <button
               type="button"
               disabled={submitting}
               onClick={submit}
-              className="h-12 flex-1 rounded-lg bg-primary-container text-[14px] font-semibold text-on-primary disabled:opacity-50 active:scale-[0.98]"
+              className="h-12 min-w-44 rounded-xl bg-primary-container px-6 text-[14px] font-semibold text-on-primary hover:bg-primary disabled:opacity-50 active:scale-[0.98] transition-all"
             >
               {submitting ? 'Submitting to CityPulse…' : 'Submit Report'}
             </button>
           )}
         </div>
-      </div>
+      </footer>
 
       {/* Duplicate Review Modal */}
       {showDuplicateModal && duplicates.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-xs">
-          <div className="w-full max-w-[430px] rounded-t-3xl sm:rounded-2xl border border-outline-variant/60 bg-surface-lowest p-5 shadow-2xl space-y-4">
+          <div className="w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-outline-variant/60 bg-surface-lowest p-5 sm:p-6 shadow-2xl space-y-4">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-[18px] font-bold">Similar Issue Nearby</h3>
@@ -448,10 +508,10 @@ export function ReportIssue() {
                   setShowDuplicateModal(false)
                   navigate(`/reports/${duplicates[0].report.id}`)
                 }}
-                className="flex h-12 w-full items-center justify-center gap-1.5 rounded-lg border border-primary text-primary font-semibold text-[13px] active:scale-[0.98]"
+                className="flex h-12 w-full items-center justify-center gap-1.5 rounded-xl border border-primary text-primary font-semibold text-[13px] hover:bg-primary/5 active:scale-[0.98] transition-all"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                View & Verify Existing Report
+                <span>View & Verify Existing Report</span>
               </button>
 
               <button
@@ -461,9 +521,9 @@ export function ReportIssue() {
                   setIgnoredDuplicate(true)
                   setStep(2)
                 }}
-                className="flex h-12 w-full items-center justify-center gap-1.5 rounded-lg bg-surface-high text-on-surface font-semibold text-[13px] active:scale-[0.98]"
+                className="flex h-12 w-full items-center justify-center gap-1.5 rounded-xl bg-surface-high text-on-surface font-semibold text-[13px] hover:bg-surface-container active:scale-[0.98] transition-all"
               >
-                No, this is a separate new issue
+                <span>No, this is a separate new issue</span>
               </button>
             </div>
           </div>

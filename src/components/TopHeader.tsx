@@ -21,35 +21,41 @@ export function TopHeader({
   const navigate = useNavigate()
 
   return (
-    <header className="sticky top-0 z-40 flex min-h-14 items-center justify-between gap-2 border-b border-outline-variant/40 bg-surface/90 px-4 py-2 backdrop-blur-md">
-      <div className="flex min-w-0 items-center gap-2">
-        {backTo != null && (
-          <button
-            type="button"
-            aria-label="Go back"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container active:scale-95"
-            onClick={() => {
-              if (typeof backTo === 'number') navigate(backTo)
-              else navigate(backTo)
-            }}
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-        )}
-        <div className="min-w-0">
-          <h1 className="truncate text-[20px] leading-[26px] font-semibold tracking-tight text-on-surface">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="truncate text-[11px] font-medium tracking-wide text-on-surface-variant">
-              {subtitle}
-            </p>
+    <header className="shrink-0 border-b border-outline-variant/40 bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-2">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          {backTo != null && (
+            <button
+              type="button"
+              aria-label="Go back"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-outline-variant/40 bg-surface-lowest text-on-surface-variant hover:bg-surface-container active:scale-95"
+              onClick={() => {
+                if (typeof backTo === 'number') navigate(backTo)
+                else navigate(backTo)
+              }}
+            >
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+          )}
+          <div className="min-w-0">
+            <h1 className="truncate text-[20px] sm:text-[22px] leading-tight font-semibold tracking-tight text-on-surface">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="truncate text-[11px] sm:text-[12px] font-medium tracking-wide text-on-surface-variant">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {right}
+          {showBell && (
+            <div className="md:hidden">
+              <BellButton />
+            </div>
           )}
         </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-1">
-        {right}
-        {showBell && <BellButton />}
       </div>
     </header>
   )

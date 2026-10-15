@@ -18,8 +18,8 @@ export function AlertCard({ report, compact = false }: { report: Report; compact
       type="button"
       onClick={() => navigate(`/reports/${report.id}`)}
       className={cn(
-        'relative min-h-[88px] w-full rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4 text-left shadow-sm transition-all active:scale-[0.99]',
-        compact && 'min-w-[260px] shrink-0',
+        'relative min-h-[88px] w-full rounded-2xl border border-outline-variant/40 bg-surface-lowest p-4 text-left shadow-sm transition-all hover:border-outline hover:shadow-md active:scale-[0.99]',
+        compact ? 'min-w-[260px] shrink-0 md:min-w-0 md:shrink' : '',
       )}
     >
       <span className={cn('absolute top-3 bottom-3 left-0 w-1 rounded-r', edge)} />
