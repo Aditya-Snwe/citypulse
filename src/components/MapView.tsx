@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import L from 'leaflet'
-import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { CircleMarker, MapContainer, Marker, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet'
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
@@ -35,7 +35,12 @@ function ClickHandler({ onPick }: { onPick?: (point: GeoPoint) => void }) {
 function Recenter({ point }: { point: GeoPoint }) {
   const map = useMap()
   useEffect(() => {
+    // Invalidate size in next tick to ensure parent flex container has computed dimensions
+    const timer = setTimeout(() => {
+      map.invalidateSize()
+    }, 100)
     map.setView([point.lat, point.lng])
+    return () => clearTimeout(timer)
   }, [map, point.lat, point.lng])
   return null
 }
@@ -66,8 +71,10 @@ export function MapView({
       center={[center.lat, center.lng]}
       zoom={zoom}
       scrollWheelZoom
+      zoomControl={false}
       className="h-full w-full"
     >
+      <ZoomControl position="bottomright" />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

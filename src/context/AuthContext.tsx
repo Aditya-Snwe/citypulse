@@ -19,14 +19,39 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
+  simulateDemoAuth: (email: string, fullName: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(() => {
+    if (!isSupabaseConfigured && typeof window !== 'undefined') {
+      const saved = localStorage.getItem('citypulse.demoUser')
+      if (saved) {
+        try {
+          return JSON.parse(saved).user || null
+        } catch {
+          return null
+        }
+      }
+    }
+    return null
+  })
   const [session, setSession] = useState<Session | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(() => {
+    if (!isSupabaseConfigured && typeof window !== 'undefined') {
+      const saved = localStorage.getItem('citypulse.demoUser')
+      if (saved) {
+        try {
+          return JSON.parse(saved).profile || null
+        } catch {
+          return null
+        }
+      }
+    }
+    return null
+  })
   const [loading, setLoading] = useState(() => isSupabaseConfigured)
 
   const fetchProfileForUser = async (userId: string) => {
@@ -104,13 +129,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isSupabaseConfigured) {
       await supabase.auth.signOut()
     }
+    localStorage.removeItem('citypulse.demoUser')
     setUser(null)
     setSession(null)
     setProfile(null)
   }
 
+  const simulateDemoAuth = (email: string, fullName: string) => {
+    const fakeId = 'demo-citizen-uuid-' + Math.random().toString(36).substring(2, 9)
+    const fakeUser = {
+      id: fakeId,
+      email,
+      app_metadata: {},
+      user_metadata: { full_name: fullName },
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+    } as unknown as User
+
+    const fakeProfile: Profile = {
+      id: fakeId,
+      full_name: fullName,
+      area_label: 'College Road, Nashik',
+      avatar_url: null,
+      role: 'Citizen',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    localStorage.setItem('citypulse.demoUser', JSON.stringify({ user: fakeUser, profile: fakeProfile }))
+    setUser(fakeUser)
+    setProfile(fakeProfile)
+  }
+
   const refreshProfile = async () => {
-    if (user) {
+    if (user && isSupabaseConfigured) {
       await fetchProfileForUser(user.id)
     }
   }
@@ -127,6 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signOut,
         refreshProfile,
+        simulateDemoAuth,
       }}
     >
       {children}

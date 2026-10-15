@@ -22,20 +22,29 @@ export function AlertPreferencesCard() {
     if (!user || !isSupabaseConfigured) return
 
     let isMounted = true
-    setLoading(true)
 
-    Promise.all([
-      dbService.getSavedLocations(user.id),
-      dbService.getAlertPreferences(user.id),
-    ])
-      .then(([locs, prefs]) => {
-        if (!isMounted) return
-        setLocations(locs)
-        setPreferences(prefs)
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false)
-      })
+    async function fetchData() {
+      if (!user) return
+      setLoading(true)
+      try {
+        const [locs, prefs] = await Promise.all([
+          dbService.getSavedLocations(user.id),
+          dbService.getAlertPreferences(user.id),
+        ])
+        if (isMounted) {
+          setLocations(locs)
+          setPreferences(prefs)
+        }
+      } catch (err) {
+        console.warn('Failed to load alert preferences:', err)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void fetchData()
 
     return () => {
       isMounted = false

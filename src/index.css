@@ -61,10 +61,38 @@ body {
   background: #e5ecf6;
 }
 
-.leaflet-pane,
+/* ── Tailwind v4 preflight fix for Leaflet ──
+   Tailwind's reset sets img { max-width:100%; display:block } which
+   destroys Leaflet tile grid. Override these for all tile-related images. */
+.leaflet-tile-pane img,
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  display: inline !important;
+}
+
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* Prevent Tailwind from collapsing Leaflet's internally-positioned elements */
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container img.leaflet-tile {
+  padding: 0;
+  margin: 0;
+}
+
+.leaflet-pane {
+  z-index: 1;
+}
+
+/* Push Leaflet zoom / attribution controls above the base pane
+   but below our custom overlay UI (z-20 = 20) */
 .leaflet-top,
 .leaflet-bottom {
-  z-index: 1;
+  z-index: 10;
 }
 
 .leaflet-control-attribution {

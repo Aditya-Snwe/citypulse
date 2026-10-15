@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 
 export function Landing() {
   const navigate = useNavigate()
-  const { user, isConfigured, signIn, signUp } = useAuth()
+  const { user, isConfigured, signIn, signUp, simulateDemoAuth } = useAuth()
 
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
@@ -27,6 +27,18 @@ export function Landing() {
         setSubmitting(false)
         return
       }
+
+      if (!isConfigured) {
+        // Offline demo sign-up simulation
+        setTimeout(() => {
+          simulateDemoAuth(email, fullName.trim())
+          setSubmitting(false)
+          setAuthModalOpen(false)
+          navigate('/home')
+        }, 500)
+        return
+      }
+
       const { error } = await signUp(email, password, fullName.trim())
       setSubmitting(false)
       if (error) {
@@ -35,6 +47,18 @@ export function Landing() {
         setSignupSuccess(true)
       }
     } else {
+      if (!isConfigured) {
+        // Offline demo sign-in simulation
+        setTimeout(() => {
+          const derivedName = email.split('@')[0] || 'Aditi Sharma'
+          simulateDemoAuth(email, derivedName.charAt(0).toUpperCase() + derivedName.slice(1))
+          setSubmitting(false)
+          setAuthModalOpen(false)
+          navigate('/home')
+        }, 400)
+        return
+      }
+
       const { error } = await signIn(email, password)
       setSubmitting(false)
       if (error) {
@@ -270,6 +294,38 @@ export function Landing() {
                     </>
                   )}
                 </button>
+
+                {!isConfigured && (
+                  <div className="pt-2 border-t border-outline-variant/30 space-y-1.5 text-center">
+                    <p className="text-[11px] font-semibold text-outline uppercase tracking-wider">
+                      Demo Mode Quick Sign-In
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          simulateDemoAuth('aditi@citypulse.local', 'Aditi Sharma')
+                          setAuthModalOpen(false)
+                          navigate('/home')
+                        }}
+                        className="flex-1 rounded-lg border border-primary/30 bg-primary/5 py-1.5 text-[12px] font-semibold text-primary hover:bg-primary/10 active:scale-95"
+                      >
+                        Citizen 1 (Aditi)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          simulateDemoAuth('rahul@citypulse.local', 'Rahul Verma')
+                          setAuthModalOpen(false)
+                          navigate('/home')
+                        }}
+                        className="flex-1 rounded-lg border border-secondary/30 bg-secondary/5 py-1.5 text-[12px] font-semibold text-secondary hover:bg-secondary/10 active:scale-95"
+                      >
+                        Citizen 2 (Rahul)
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="text-center pt-1">
                   <button
